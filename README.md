@@ -91,6 +91,13 @@ vim.keymap.set("n", "<leader>ud", function()
 end, { desc = "Toggle diagnostics" })
 ```
 
+## Examples
+
+See [integration examples](docs/integrations.md) for snippets covering core
+options, diagnostics, inlay hints, `tiny-inline-diagnostic.nvim`,
+`gitsigns.nvim`, `auto-save.nvim`, Neo-tree preferences, DAP UI preferences,
+and `snacks.nvim` interop.
+
 ## API
 
 ```lua
