@@ -16,11 +16,19 @@ visibility, or custom UI behavior.
 
 ## Installation
 
-With `lazy.nvim`:
+Choose one installation method. The examples use Neovim 0.10+ APIs.
+No other plugins are required.
+
+### lazy.nvim / LazyVim
+
+If your config imports `lua/plugins/` (including LazyVim), create
+`lua/plugins/persist-toggle.lua` with the following. Otherwise, add the inner
+plugin spec to your existing `require("lazy").setup({ ... })` list.
 
 ```lua
-{
+return {
   "javanoo6/persist-toggle.nvim",
+  lazy = false, -- Restore preferences at startup.
   opts = {
     toggles = {
       diagnostics = {
@@ -45,6 +53,102 @@ With `lazy.nvim`:
   },
 }
 ```
+
+Run `:Lazy sync` and restart Neovim. `opts` calls `setup()` automatically.
+Use the plugin's commands or API to change toggles so their values are saved;
+changes made directly through other plugins are not automatically tracked.
+
+### Local development with lazy.nvim
+
+To try changes from a local checkout, use the same spec above and add `dir`:
+
+```lua
+dir = vim.fn.expand("~/src/persist-toggle.nvim"),
+```
+
+Replace the path with your checkout's location. Keep `lazy = false` and the
+`opts` table from the full example. lazy.nvim supports local plugins through
+[`dir`](https://lazy.folke.io/spec); a Git submodule is not required.
+
+### vim-plug
+
+Add this line between your existing `plug#begin()` and `plug#end()` calls:
+
+```vim
+Plug 'javanoo6/persist-toggle.nvim'
+```
+
+Run `:PlugInstall`, restart Neovim, then add the [manual setup](#manual-setup)
+below after `plug#end()`. See [vim-plug](https://github.com/junegunn/vim-plug)
+for plugin manager setup instructions.
+
+### Native Neovim package
+
+Without a plugin manager, clone into Neovim's package directory. For the
+default Linux/macOS config location:
+
+```sh
+git clone https://github.com/javanoo6/persist-toggle.nvim.git \
+  "${XDG_CONFIG_HOME:-$HOME/.config}/nvim/pack/plugins/start/persist-toggle.nvim"
+```
+
+Add the [manual setup](#manual-setup) below to `init.lua`, then restart Neovim.
+For custom config locations, use `:echo stdpath('config')` to find the base
+directory. See Neovim's [package documentation](https://neovim.io/doc/user/pack.html).
+
+### Git submodule in your config repository
+
+This is optional: use it when you want your config repository to track the
+plugin checkout and its exact commit. With lazy.nvim, the normal GitHub spec
+and `lazy-lock.json` are usually sufficient.
+
+From the root of your Git-managed Neovim config, run:
+
+```sh
+git submodule add https://github.com/javanoo6/persist-toggle.nvim.git \
+  pack/plugins/start/persist-toggle.nvim
+```
+
+Commit `.gitmodules` and the submodule entry with your config changes. On
+another machine, clone your config with `git clone --recurse-submodules`, or
+run `git submodule update --init --recursive` in an existing clone.
+
+This uses native package loading, so add the [manual setup](#manual-setup)
+below. Choose either this method or the lazy.nvim spec to avoid duplicate
+installations.
+
+### Manual setup
+
+For vim-plug, native packages, and the submodule method, add this to `init.lua`
+after your plugin manager setup, if any. For `init.vim`, wrap the Lua code in
+`lua << EOF` and `EOF` lines.
+
+```lua
+require("persist-toggle").setup({
+  toggles = {
+    diagnostics = {
+      default = true,
+      get = function()
+        return vim.diagnostic.is_enabled()
+      end,
+      set = function(value)
+        vim.diagnostic.enable(value)
+      end,
+    },
+  },
+})
+```
+
+Setup restores registered preferences immediately. For toggles that call
+another plugin, ensure that plugin is initialized before applying its state;
+see the [integration examples](docs/integrations.md).
+
+### Verify the installation
+
+Run `:PersistToggleInfo` to see the registered toggles and state file path.
+Run `:PersistToggle diagnostics`, restart Neovim, and check that diagnostics
+keep the value you selected. An empty `setup({})` creates the commands but
+registers no toggles.
 
 ## Usage
 
