@@ -221,8 +221,8 @@ end
 
 function M.values()
   local values = {}
-  for id, toggle in pairs(registry) do
-    values[id] = state.values[id] ~= nil and state.values[id] or toggle.default
+  for id in pairs(registry) do
+    values[id] = M.get(id)
   end
   return values
 end
@@ -281,7 +281,7 @@ function M.info()
   for _, id in ipairs(sorted_ids()) do
     local toggle = registry[id]
     local persisted = state.values[id]
-    local effective = persisted ~= nil and persisted or toggle.default
+    local effective = M.get(id)
     table.insert(
       lines,
       ("%s default=%s persisted=%s effective=%s current=%s"):format(

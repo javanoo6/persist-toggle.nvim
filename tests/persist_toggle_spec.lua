@@ -37,6 +37,12 @@ local function run()
     plugin.toggle("diagnostics")
     assert_eq(plugin.get("diagnostics"), false, "toggle updates persisted value")
     assert_eq(applied.diagnostics, false, "toggle applies value")
+    assert_eq(plugin.values().diagnostics, false, "values preserves a false override of a true default")
+    assert_eq(
+      plugin.info():find("diagnostics default=true persisted=false effective=false current=false", 1, true) ~= nil,
+      true,
+      "info reports a false override as the effective value"
+    )
 
     plugin.setup({
       notify = false,
